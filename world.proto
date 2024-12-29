@@ -51,6 +51,8 @@ message WorldPacket {
         GlobalSwitchResetPacket global_switch_reset_packet = 33;
 
         PerformWorldActionPacket perform_world_action_packet = 34;
+
+        PlayerSpectatePacket player_spectate_packet = 35;
     }
 }
 
@@ -201,6 +203,11 @@ message PlayerFacePacket {
     int32 face_id = 2;
 }
 
+message PlayerSpectatePacket {
+    optional int32 player_id = 1;
+    int32 spectate_player = 2;
+}
+
 message PlayerGodModePacket {
     optional int32 player_id = 1;
     bool enabled = 2;
@@ -327,18 +334,21 @@ message PlayerRights {
     bool can_god = 2;
     bool can_toggle_minimap = 3;
     bool can_change_world_settings = 4;
+
+    repeated string available_commands = 5;
 }
 
 message WorldMeta {
     string title = 1;
     int32 plays = 2;
     string owner = 3;
-    string owner_role = 4;
-    string description = 5;
-    string visibility = 6;
-    WorldType world_Type = 7;
-    bool has_unsaved_changes = 8;
-    bool minimap_enabled = 9;
+    string description = 4;
+    string visibility = 5;
+    WorldType world_Type = 6;
+    bool has_unsaved_changes = 7;
+    int32 max_players = 8;
+    string owner_role = 9;
+    bool minimap_enabled = 10;
     
     enum WorldType {
         Saved = 0;
