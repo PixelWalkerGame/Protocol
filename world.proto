@@ -278,6 +278,8 @@ message PlayerCountersUpdatePacket {
     int32 coins = 2;
     int32 blue_coins = 3;
     int32 deaths = 4;
+
+    bool from_server = 5;
 }
 
 message PlayerLocalSwitchChangedPacket {
