@@ -54,7 +54,7 @@ message WorldPacket {
 
         PlayerSpectatePacket player_spectate_packet = 35;
 
-        CounterTransactionPacket counter_transaction_packet = 36;
+        PlayerCounterTransactionPacket player_counter_transaction_packet = 36;
     }
 }
 
@@ -96,8 +96,8 @@ message PerformWorldActionPacket {
     Action action = 1;
 }
 
-message CounterTransactionPacket {
-    int32 player_id = 1;
+message PlayerCounterTransactionPacket {
+    optional int32 player_id = 1;
     int32 counter_id = 2;
     int32 count = 3;
 }
@@ -223,7 +223,7 @@ message PlayerGodModePacket {
 
 message PlayerModModePacket {
     optional int32 player_id = 1;
-    bool enabled = 3;
+    bool enabled = 2;
 }
 
 message PlayerRespawnPacket {
