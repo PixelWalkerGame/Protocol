@@ -3,7 +3,6 @@ package WorldPackets;
 
 option csharp_namespace = "PixelWalker.Networking.Protobuf.WorldPackets";
 
-
 message WorldPacket {
     oneof packet {
         /* Ping packet */
@@ -37,6 +36,8 @@ message WorldPacket {
         PlayerExchangeEffectsPacket player_exchange_effects_packet = 24;
         PlayerTeleportedPacket player_teleported_packet = 25;
         PlayerMagicPacket player_magic_packet = 41;
+        GameTicksSyncRequestPacket game_ticks_sync_request_packet = 42;
+        GameTicksSyncResponsePacket game_ticks_sync_response_packet = 43;
 
         /* World packets - Mostly send out by the server */
         WorldReloadedPacket world_reloaded_packet = 26;
@@ -83,9 +84,17 @@ message GlobalSwitchResetPacket {
 }
 
 message SystemMessagePacket {
+    enum Type {
+        CHAT = 0;
+        TOAST = 1;
+        DIALOG = 2;
+    }
+
     string title = 1;
     string message = 2;
-    bool is_dialog = 3;
+    Type type = 3;
+    bool is_broadcast = 4;
+    optional string icon = 5;
 }
 
 message OldChatMessagesPacket {
@@ -118,11 +127,26 @@ message PlayerCounterTransactionPacket {
  * World PACKETS
  */
 message WorldReloadedPacket {
-    bytes world_data = 1;
+    // New structured world data format (same as PlayerInitPacket)
+    repeated BlockDataInfo block_data_palette = 1;
+    bytes background_layer_data = 2;
+    bytes foreground_layer_data = 3;
+    bytes overlay_layer_data = 4;
 }
 
 message WorldClearedPacket {
     /* Empty */
+}
+
+// Block field value that can hold different types
+message BlockFieldValue {
+    oneof value {
+        int32 int32_value = 1;
+        uint32 uint32_value = 2;
+        string string_value = 3;
+        bool bool_value = 4;
+        bytes byte_array_value = 5;
+    }
 }
 
 message WorldBlockPlacedPacket {
@@ -133,8 +157,8 @@ message WorldBlockPlacedPacket {
     int32 layer = 3;
     int32 block_id = 4;
 
-    // Legacy? Holds a byte[] that can hold extra information
-    bytes extra_fields = 5;
+    // Structured block fields
+    map<string, BlockFieldValue> fields = 5;
 }
 
 message WorldBlockFilledPacket {
@@ -143,8 +167,8 @@ message WorldBlockFilledPacket {
     int32 layer = 3;
     int32 block_id = 4;
 
-    // Legacy? Holds a byte[] that can hold extra information
-    bytes extra_fields = 5;
+    // Structured block fields
+    map<string, BlockFieldValue> fields = 5;
 }
 
 message WorldMetaUpdatePacket {
@@ -166,13 +190,27 @@ message PlayerInitPacket {
 
     /* Very specific world state */
     bytes global_switch_state = 5;
-    bytes world_data = 6;
 
     // Did player woot?
-    PlayerWoot player_woot = 7;
+    PlayerWoot player_woot = 6;
 
     // Text labels to display in the world
-    repeated TextLabel text_labels = 8;
+    repeated TextLabel text_labels = 7;
+    
+    // Structured world data format
+    repeated BlockDataInfo block_data_palette = 8;
+    bytes background_layer_data = 9;
+    bytes foreground_layer_data = 10;
+    bytes overlay_layer_data = 11;
+    
+    // Elapsed ticks since game started (100 ticks per second) - clients use this as reference point (0)
+    int64 game_elapsed_time = 12;
+}
+
+// Information about a block data type for the palette
+message BlockDataInfo {
+    int32 block_id = 1;
+    map<string, BlockFieldValue> fields = 2;
 }
 
 message PlayerInitReceivedPacket {
@@ -335,6 +373,15 @@ message PlayerMagicPacket {
 message PlayerWoot {
     optional int32 player_id = 1;
     bool active = 2;
+}
+
+message GameTicksSyncRequestPacket {
+    /* Empty - client requests current game ticks */
+}
+
+message GameTicksSyncResponsePacket {
+    int64 game_elapsed_time = 1;
+    bool is_paused = 2;
 }
 
 /*
