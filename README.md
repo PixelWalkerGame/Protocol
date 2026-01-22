@@ -12,3 +12,5 @@ In order to retrieve the latest room type, please see the [list room types endpo
 If you're looking for all the block palette mappings, please see the [mappings endpoint](https://server.pixelwalker.net/listblocks) from the game server. This can be referenced in your program so you always have the most up-to-date mappings, as numerical block ids are subject to change and should not be used in persistent storage. In addition, palette ids are subject to change as well, but those changes are posted in our [Discord server](https://discord.com/invite/rDgtbbzDqX) for the developer community.
 ### Help
 If you'd like help with your program and to connect with the community, please join our [Discord server](https://discord.com/invite/rDgtbbzDqX).
+### Community Resources
+The majority of community resources are in the pinned #programming channel on the Discord server, but a notable resource to utilize API endpoints is the [PixelWalker Swagger API](https://piratux.github.io/PixelWalker-Api/) maintained by Piratux, a community member.
