@@ -6,6 +6,12 @@ PixelWalker uses [Protocol Buffers v3](https://protobuf.dev/programming-guides/p
 In addition, we have volunteer community members who maintain unofficial SDKs in a variety of programming languages that can also interface with the game. Using an existing SDK is typically easier for those who are learning how to program, as the foundation is built for you, such as built-in user and block management, and other features. Please join our [Discord server](https://discord.com/invite/rDgtbbzDqX) to learn more about what the community has to offer! Please keep in mind that these third party SDKs are not vetted by the PixelWalker team, and that they should be used at your own risk. (Always check the source code of any application before providing your credentials or authentication tokens!)
 
 ## Useful Resources
+### Authentication
+#### Join Keys
+PixelWalker uses a JWT to authenticate players to join rooms. Each time you want to join a new room, you will need another Join Key. Later when joining the web socket for realtime communications, this token needs to be specified. To obotain a Join Key, you'll first need to make a request to with authentication headers to https://api.pixelwalker.net/api/joinkey/pixelwalker/{RoomId} which will return a token. If you don't supply authentication headers, it will default to a guest user. You can use jwt.io to decode the JWT and examine the subject field to see the player's identifier. If it's guest, then it's a guest.
+#### Websocket Realtime Communications
+Once you have your Join Key, you'll be able to connect to the game's websocket server and be sure to pass the Join Key as a parameter.
+wss://server.pixelwalker.net/ws?joinKey={JoinKey}
 ### Blocks
 If you're looking for all the block palette mappings, please see the [mappings endpoint](https://server.pixelwalker.net/listblocks) from the game server. This can be referenced in your program so you always have the most up-to-date mappings, as numerical block ids are subject to change and should not be used in persistent storage. In addition, palette ids are subject to change as well, but those changes are posted in our [Discord server](https://discord.com/invite/rDgtbbzDqX) for the developer community.
 ### Help
