@@ -6,8 +6,6 @@ PixelWalker uses [Protocol Buffers v3](https://protobuf.dev/programming-guides/p
 In addition, we have volunteer community members who maintain unofficial SDKs in a variety of programming languages that can also interface with the game. Using an existing SDK is typically easier for those who are learning how to program, as the foundation is built for you, such as built-in user and block management, and other features. Please join our [Discord server](https://discord.com/invite/rDgtbbzDqX) to learn more about what the community has to offer! Please keep in mind that these third party SDKs are not vetted by the PixelWalker team, and that they should be used at your own risk. (Always check the source code of any application before providing your credentials or authentication tokens!)
 
 ## Useful Resources
-### Authentication
-In order to retrieve the latest room type, please see the [list room types endpoint](https://server.pixelwalker.net/listroomtypes) from the game server. Room types change each time the game's server-sided code is updated.
 ### Blocks
 If you're looking for all the block palette mappings, please see the [mappings endpoint](https://server.pixelwalker.net/listblocks) from the game server. This can be referenced in your program so you always have the most up-to-date mappings, as numerical block ids are subject to change and should not be used in persistent storage. In addition, palette ids are subject to change as well, but those changes are posted in our [Discord server](https://discord.com/invite/rDgtbbzDqX) for the developer community.
 ### Help
