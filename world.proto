@@ -50,6 +50,7 @@ message WorldPacket {
         WorldLabelDeleteRequestPacket world_label_delete_request_packet = 47;
         WorldLabelUpsertPacket world_label_upsert_packet = 48;
         WorldLabelDeletePacket world_label_delete_packet = 49;
+        WorldResizePacket world_resize_packet = 50;
 
         /* MISC */
         OldChatMessagesPacket old_chat_messages_packet = 31;
@@ -104,6 +105,13 @@ message SystemMessagePacket {
 
 message OldChatMessagesPacket {
     repeated OldChatMessage old_chat_messages = 1;
+}
+
+message WorldResizePacket {
+    int32 left = 1;
+    int32 top = 2;
+    int32 right = 3;
+    int32 bottom = 4;
 }
 
 message WorldActionUpdatePacket {
@@ -540,6 +548,9 @@ message ProtoTextLabel {
     uint32 shadow_color = 12;
     int32 shadow_offset_x = 13;
     int32 shadow_offset_y = 14;
+    bool outline = 15;
+    uint32 outline_color = 16;
+    int32 outline_width = 17;
 }
 
 /*
