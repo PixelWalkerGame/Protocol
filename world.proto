@@ -52,6 +52,16 @@ message WorldPacket {
         WorldLabelDeletePacket world_label_delete_packet = 49;
         WorldResizePacket world_resize_packet = 50;
 
+        /* Zone packets */
+        WorldZoneUpsertRequestPacket world_zone_upsert_request_packet = 51;
+        WorldZoneUpsertPacket world_zone_upsert_packet = 52;
+        WorldZoneDeleteRequestPacket world_zone_delete_request_packet = 53;
+        WorldZoneDeletePacket world_zone_delete_packet = 54;
+        WorldZoneAreaEditRequestPacket world_zone_area_edit_request_packet = 55;
+        WorldZoneAreaEditPacket world_zone_area_edit_packet = 56;
+        WorldZoneReorderRequestPacket world_zone_reorder_request_packet = 57;
+        WorldZoneReorderPacket world_zone_reorder_packet = 58;
+
         /* MISC */
         OldChatMessagesPacket old_chat_messages_packet = 31;
         SystemMessagePacket system_message_packet = 32;
@@ -148,6 +158,9 @@ message WorldReloadedPacket {
 
     // Text labels to display in the world
     repeated ProtoTextLabel text_labels = 5;
+
+    // Zones defined in the world
+    repeated ProtoZone zones = 6;
 }
 
 message WorldClearedPacket {
@@ -210,6 +223,63 @@ message WorldLabelDeletePacket {
 }
 
 /*
+ * Zone PACKETS
+ */
+
+// Client -> server: create a zone or update its settings.
+message WorldZoneUpsertRequestPacket {
+    ProtoZone zone = 1;
+}
+
+// Server -> clients: a zone was created or its settings changed.
+message WorldZoneUpsertPacket {
+    ProtoZone zone = 1;
+}
+
+// Client -> server: delete a zone.
+message WorldZoneDeleteRequestPacket {
+    string id = 1;
+}
+
+// Server -> clients: a zone was deleted.
+message WorldZoneDeletePacket {
+    string id = 1;
+}
+
+// Client -> server: add or remove a rectangle to/from a zone's membership.
+message WorldZoneAreaEditRequestPacket {
+    string zone_id = 1;
+    int32 x = 2;
+    int32 y = 3;
+    int32 width = 4;
+    int32 height = 5;
+    bool add = 6;
+}
+
+// Server -> clients: apply a rectangle add/remove to a zone's membership.
+message WorldZoneAreaEditPacket {
+    optional int32 player_id = 1;
+    string zone_id = 2;
+    int32 x = 3;
+    int32 y = 4;
+    int32 width = 5;
+    int32 height = 6;
+    bool add = 7;
+}
+
+// Client -> server: move a zone to a new position in the zone list.
+message WorldZoneReorderRequestPacket {
+    string id = 1;
+    int32 index = 2;
+}
+
+// Server -> clients: a zone moved to a new position in the zone list.
+message WorldZoneReorderPacket {
+    string id = 1;
+    int32 index = 2;
+}
+
+/*
  * PLAYER PACKETS
  */
 message PlayerInitPacket {
@@ -241,6 +311,9 @@ message PlayerInitPacket {
 
     // Owned shop item ids for the connecting player (e.g. "smiley_frustrated", "aura_pinwheel")
     repeated string owned_items = 13;
+
+    // Zones defined in the world
+    repeated ProtoZone zones = 14;
 }
 
 // Information about a block data type for the palette
@@ -560,4 +633,141 @@ enum TextAlignment {
     LEFT = 0;
     CENTER = 1;
     RIGHT = 2;
+}
+
+/*
+ * Zone enums. INHERIT takes the value from the next lower-priority zone,
+ * falling back to the global zone.
+ */
+enum ZoneVision {
+    ZONE_VISION_INHERIT = 0;
+    ZONE_VISION_OFF = 1;
+    ZONE_VISION_ON = 2;
+}
+
+enum ZoneCameraMode {
+    ZONE_CAMERA_MODE_INHERIT = 0;
+    ZONE_CAMERA_MODE_FOLLOW = 1;
+    ZONE_CAMERA_MODE_LOCK = 2;
+}
+
+enum ZoneCameraTarget {
+    ZONE_CAMERA_TARGET_INHERIT = 0;
+    ZONE_CAMERA_TARGET_WHOLE = 1;
+    ZONE_CAMERA_TARGET_PART = 2;
+}
+
+enum ZoneCameraMovement {
+    ZONE_CAMERA_MOVEMENT_INHERIT = 0;
+    ZONE_CAMERA_MOVEMENT_SMOOTH = 1;
+    ZONE_CAMERA_MOVEMENT_INSTANT = 2;
+}
+
+enum ZoneLighting {
+    ZONE_LIGHTING_INHERIT = 0;
+    ZONE_LIGHTING_OFF = 1;
+    ZONE_LIGHTING_ON = 2;
+}
+
+enum ZoneFog {
+    ZONE_FOG_INHERIT = 0;
+    ZONE_FOG_OFF = 1;
+    ZONE_FOG_ON = 2;
+}
+
+enum ZoneDistortion {
+    ZONE_DISTORTION_INHERIT = 0;
+    ZONE_DISTORTION_OFF = 1;
+    ZONE_DISTORTION_ON = 2;
+}
+
+enum ZonePlayerLight {
+    ZONE_PLAYER_LIGHT_INHERIT = 0;
+    ZONE_PLAYER_LIGHT_OFF = 1;
+    ZONE_PLAYER_LIGHT_ON = 2;
+}
+
+message ProtoZone {
+    string id = 1;
+    string name = 2;
+    int32 priority = 3;
+    // Display color as a hue (0-359)
+    int32 hue = 4;
+
+    int32 width = 5;
+    int32 height = 6;
+    bytes membership_rle = 7; // per-block 0/1 mask, RLE-compressed
+
+    ZoneVision vision = 8;
+    // Hides the zone's interior from players outside it.
+    ZoneVision vision_outside = 9;
+    // Fill color (0xRRGGBB) for hidden areas; overrides the world's void color.
+    bool has_vision_color = 10;
+    int32 vision_color = 11;
+
+    ZoneCameraMode camera_mode_x = 12;
+    ZoneCameraMode camera_mode_y = 13;
+    ZoneCameraTarget camera_target = 14;
+    ZoneCameraMovement camera_movement = 15;
+    // Camera follow smoothing while not locked to this zone.
+    ZoneCameraMovement camera_follow_movement = 16;
+
+    // Each effect below has per-side feather widths (px), signed per-side
+    // margins (px, positive grows outward) and edge smoothing (px, rounds
+    // corners of the feathered coverage).
+
+    // Lighting (darken + tint)
+    ZoneLighting lighting = 17;
+    int32 light_darkness = 18;   // 0-100
+    int32 light_hue = 19;        // 0-359
+    int32 light_tint = 20;       // 0-100
+    int32 light_feather_top = 21;
+    int32 light_feather_right = 22;
+    int32 light_feather_bottom = 23;
+    int32 light_feather_left = 24;
+    int32 light_margin_top = 25;
+    int32 light_margin_right = 26;
+    int32 light_margin_bottom = 27;
+    int32 light_margin_left = 28;
+    int32 light_smoothing = 29;
+
+    // Personal light carried by players inside the zone.
+    ZonePlayerLight player_light = 30;
+    int32 player_light_radius = 31;     // px
+    int32 player_light_strength = 32;   // 0-100
+    int32 player_light_hue = 33;        // 0-359
+    int32 player_light_saturation = 34; // 0-100
+
+    // Fog
+    ZoneFog fog = 35;
+    int32 fog_hue = 36;        // 0-359
+    int32 fog_saturation = 37; // 0-100
+    int32 fog_opacity = 38;    // 0-100
+    int32 fog_density = 39;    // 0-100
+    int32 fog_direction = 40;  // 0-359 degrees, clockwise from east
+    int32 fog_speed = 41;      // 0-100
+    int32 fog_feather_top = 42;
+    int32 fog_feather_right = 43;
+    int32 fog_feather_bottom = 44;
+    int32 fog_feather_left = 45;
+    int32 fog_margin_top = 46;
+    int32 fog_margin_right = 47;
+    int32 fog_margin_bottom = 48;
+    int32 fog_margin_left = 49;
+    int32 fog_smoothing = 50;
+
+    // Distortion
+    ZoneDistortion distortion = 51;
+    int32 distortion_strength = 52; // 0-100
+    int32 distortion_scale = 53;    // 0-100
+    int32 distortion_speed = 54;    // 0-100
+    int32 distortion_feather_top = 55;
+    int32 distortion_feather_right = 56;
+    int32 distortion_feather_bottom = 57;
+    int32 distortion_feather_left = 58;
+    int32 distortion_margin_top = 59;
+    int32 distortion_margin_right = 60;
+    int32 distortion_margin_bottom = 61;
+    int32 distortion_margin_left = 62;
+    int32 distortion_smoothing = 63;
 }
